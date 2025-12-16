@@ -1,0 +1,46 @@
+name: CI/CD Pipeline for Travel Portal
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Build backend
+        run: |
+          cd backend
+          npm run build
+
+      - name: Deploy backend using PM2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.BACKEND_HOST }}
+          username: ${{ secrets.BACKEND_USER }}
+          key: ${{ secrets.BACKEND_SSH_KEY }}
+          script: |
+            cd /var/www/travel-portal
+            git pull origin main
+            cd backend
+            npm ci
+            npm run build
+            pm2 restart travel-backend || pm2 start dist/index.js --name travel-backend
+            pm2 save

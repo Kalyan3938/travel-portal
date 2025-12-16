@@ -1,0 +1,13 @@
+.env
+dist
+node_modules
+coverage
+.vscode
+.DS_Store
+*.log*
+.idea
+*.iml
+logs
+.claude
+# public
+# docker-compose.yml
