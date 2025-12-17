@@ -27,27 +27,3 @@ jobs:
       - name: Build backend
         run: |
           npm run build
-
-
-  deploy-backend:
-    name: Deploy Backend
-    runs-on: ubuntu-latest
-    needs: build-backend   # Deploy only if build succeeds
-
-    steps:
-      - name: Deploy backend using PM2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.BACKEND_HOST }}
-          username: ${{ secrets.BACKEND_USER }}
-          key: ${{ secrets.BACKEND_SSH_KEY }}
-          script: |
-            cd /var/www/travel-portal
-            git pull origin main
-
-            cd backend
-            npm ci
-            npm run build
-
-            pm2 restart travel-backend || pm2 start dist/index.js --name travel-backend
-            pm2 save
