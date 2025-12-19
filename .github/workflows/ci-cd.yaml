@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-backend:
-    name: Build Backend
+    name: Build Backend & Security Scan
     runs-on: ubuntu-latest
 
     steps:
@@ -21,9 +21,15 @@ jobs:
           node-version: '18'
 
       - name: Install backend dependencies
-        run: |
-          npm ci
+        run: npm ci
 
       - name: Build backend
-        run: |
-          npm run build
+        run: npm run build
+
+      # SNYK SECURITY SCAN
+      - name: Run Snyk to check vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
